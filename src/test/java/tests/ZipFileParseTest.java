@@ -13,24 +13,30 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ZipFileParseTest {
 
-    ClassLoader cl = ZipFileParseTest.class.getClassLoader();
+    private final ClassLoader cl = ZipFileParseTest.class.getClassLoader();
 
     @Test
     @DisplayName("Проверка наличия и контента для PDF файла")
     public void parsePDFFileInZipArchiveTest() throws Exception {
+        boolean pdfFile =false;
         try (InputStream inputStream = cl.getResourceAsStream("sample-zip-file.zip")) {
-            assert inputStream != null;
+            assertThat(inputStream).isNotNull();
             try (ZipInputStream zis = new ZipInputStream(inputStream)) {
                 ZipEntry zipEntry;
                 while ((zipEntry = zis.getNextEntry()) != null) {
                     if (zipEntry.getName().contains(".pdf")) {
+                        pdfFile = true;
                         PDF pdf = new PDF(zis);
                         assertThat(pdf.text).contains("Lorem ipsum");
                     }
                 }
+                assertThat(pdfFile)
+                        .as("Проверяем наличие pdf файла в архиве")
+                        .isTrue();
             }
         }
     }
@@ -38,12 +44,14 @@ public class ZipFileParseTest {
     @Test
     @DisplayName("Проверка наличия и контента для CSV файла")
     public void parseCSVFileInZipArchiveTest() throws Exception {
+        boolean csvFile = false;
         try (InputStream inputStream = cl.getResourceAsStream("sample-zip-file.zip")) {
-            assert inputStream != null;
+            assertThat(inputStream).isNotNull();
             try (ZipInputStream zis = new ZipInputStream(inputStream)) {
                 ZipEntry zipEntry;
                 while ((zipEntry = zis.getNextEntry()) != null) {
                     if (zipEntry.getName().contains(".csv")) {
+                        csvFile = true;
                         CSVReader csvReader = new CSVReader(new InputStreamReader(zis));
                         List<String[]> content = csvReader.readAll();
                         String[] row = content.get(1);
@@ -51,6 +59,9 @@ public class ZipFileParseTest {
                         assertThat(row[3]).isEqualTo("Female");
                     }
                 }
+                assertThat(csvFile)
+                        .as("Проверяем наличие csv файла в архиве")
+                        .isTrue();
             }
         }
     }
@@ -58,12 +69,14 @@ public class ZipFileParseTest {
     @Test
     @DisplayName("Проверка наличия и контента для XLS файла")
     public void parseXLSFileInZipArchiveTest() throws Exception {
+        boolean xlsFile = false;
         try (InputStream inputStream = cl.getResourceAsStream("sample-zip-file.zip")) {
-            assert inputStream != null;
+            assertThat(inputStream).isNotNull();
             try (ZipInputStream zis = new ZipInputStream(inputStream)) {
                 ZipEntry zipEntry;
                 while ((zipEntry = zis.getNextEntry()) != null) {
                     if (zipEntry.getName().contains(".xls")) {
+                        xlsFile = true;
                         XLS xls = new XLS(zis);
                         assertThat(
                                 xls.excel.getSheetAt(0)
@@ -73,6 +86,9 @@ public class ZipFileParseTest {
                         ).isEqualTo("Hashimoto");
                     }
                 }
+                assertThat(xlsFile)
+                        .as("Проверяем наличие xls файла в архиве")
+                        .isTrue();
             }
         }
     }
